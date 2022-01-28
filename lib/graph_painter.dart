@@ -17,13 +17,22 @@ class GraphPainter extends CustomPainter {
     };
 
     print("$data");
-    canvas.drawCircle(
-        Offset(size.width / 2, size.height / 2),
-        50,
-        Paint()
-          ..color = Colors.amber
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 10);
+
+    int dataLength = data.length - 1;
+    int padding = 50;
+
+    double graphWidth = size.width - padding * 2;
+
+    for (int i = 0; i <= dataLength; i++) {
+      Offset startPoint = Offset(graphWidth / dataLength * i + padding, 50);
+      Offset endPoint =
+          Offset(graphWidth / dataLength * i + padding, size.height - 50);
+
+      Paint paint = Paint()
+        ..strokeWidth = 1
+        ..color = Colors.white;
+      canvas.drawLine(startPoint, endPoint, paint);
+    }
   }
 
   @override

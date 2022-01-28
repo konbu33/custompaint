@@ -1,3 +1,4 @@
+import 'package:custompaint/graph_painter.dart';
 import 'package:flutter/material.dart';
 
 class GraphScreen extends StatefulWidget {
@@ -10,6 +11,14 @@ class GraphScreen extends StatefulWidget {
 class _GraphScreenState extends State<GraphScreen> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("graph"),
+      ),
+      body: CustomPaint(
+        size: Size(double.infinity, double.infinity),
+        painter: GraphPainter(),
+      ),
+    );
   }
 }

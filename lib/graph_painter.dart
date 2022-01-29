@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter/material.dart';
@@ -21,41 +23,71 @@ class GraphPainter extends CustomPainter {
 
     int dataLength = data.length - 1;
     int padding = 50;
-
     double graphWidth = size.width - padding * 2;
 
-    for (int i = 0; i <= dataLength; i++) {
-      Offset startPoint = Offset(graphWidth / dataLength * i + padding, 50);
-      Offset endPoint =
-          Offset(graphWidth / dataLength * i + padding, size.height - 50);
+    Paint drawColumnLine() {
+      late Paint paint;
 
-      Paint drawRowLine() {
-        Paint paint = Paint()
+      for (int i = 0; i <= dataLength; i++) {
+        Offset startPoint = Offset(graphWidth / dataLength * i + padding, 50);
+        Offset endPoint =
+            Offset(graphWidth / dataLength * i + padding, size.height - 50);
+
+        paint = Paint()
           ..strokeWidth = 1
           ..color = Colors.white;
         canvas.drawLine(startPoint, endPoint, paint);
-
-        return paint;
       }
-
-      drawRowLine();
-
-      Offset labelEndPoint = Offset(
-          graphWidth / dataLength * i + padding - 10, size.height - 50 + 10);
-
-      TextPainter(
-        textDirection: TextDirection.ltr,
-        text: TextSpan(
-          text: DateFormat('M/d').format(data.keys.toList()[i]),
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-          ),
-        ),
-      )
-        ..layout()
-        ..paint(canvas, labelEndPoint);
+      return paint;
     }
+
+    TextPainter drawColumnLabel() {
+      late TextPainter textPainter;
+
+      for (int i = 0; i <= dataLength; i++) {
+        Offset labelEndPoint = Offset(
+            graphWidth / dataLength * i + padding - 10, size.height - 50 + 10);
+
+        textPainter = TextPainter(
+          textDirection: TextDirection.ltr,
+          text: TextSpan(
+            text: DateFormat('M/d').format(data.keys.toList()[i]),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+            ),
+          ),
+        )
+          ..layout()
+          ..paint(canvas, labelEndPoint);
+      }
+      return textPainter;
+    }
+
+    Paint drawRowLine() {
+      int horizontalLine = 5;
+      int padding = 50;
+      double graphHeight = size.height - padding * 2 - 30;
+      late Paint paint;
+      for (int i = 0; i <= horizontalLine; i++) {
+        print("i : ${i}");
+        Offset startPoint = Offset(
+            50 - 10, size.height - padding - graphHeight / horizontalLine * i);
+        Offset endPoint = Offset(size.width - 50 + 10,
+            size.height - padding - graphHeight / horizontalLine * i);
+
+        paint = Paint()
+          ..strokeWidth = 1
+          ..color = Colors.white;
+
+        canvas.drawLine(startPoint, endPoint, paint);
+      }
+      return paint;
+    }
+
+    drawColumnLine();
+    drawColumnLabel();
+    drawRowLine();
   }
 
   @override

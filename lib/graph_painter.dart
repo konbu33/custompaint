@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
 class GraphPainter extends CustomPainter {
   @override
@@ -16,7 +17,7 @@ class GraphPainter extends CustomPainter {
       now: 3,
     };
 
-    print("$data");
+    print("${data.keys.toList()}");
 
     int dataLength = data.length - 1;
     int padding = 50;
@@ -28,10 +29,32 @@ class GraphPainter extends CustomPainter {
       Offset endPoint =
           Offset(graphWidth / dataLength * i + padding, size.height - 50);
 
-      Paint paint = Paint()
-        ..strokeWidth = 1
-        ..color = Colors.white;
-      canvas.drawLine(startPoint, endPoint, paint);
+      Paint drawRowLine() {
+        Paint paint = Paint()
+          ..strokeWidth = 1
+          ..color = Colors.white;
+        canvas.drawLine(startPoint, endPoint, paint);
+
+        return paint;
+      }
+
+      drawRowLine();
+
+      Offset labelEndPoint = Offset(
+          graphWidth / dataLength * i + padding - 10, size.height - 50 + 10);
+
+      TextPainter(
+        textDirection: TextDirection.ltr,
+        text: TextSpan(
+          text: DateFormat('M/d').format(data.keys.toList()[i]),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+          ),
+        ),
+      )
+        ..layout()
+        ..paint(canvas, labelEndPoint);
     }
   }
 

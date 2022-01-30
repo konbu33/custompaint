@@ -12,10 +12,10 @@ class GraphPainter extends CustomPainter {
     final now = DateTime.now();
     Map<DateTime, double> data = {
       now.add(Duration(days: -6)): 22,
-      now.add(Duration(days: -5)): 40,
+      now.add(Duration(days: -5)): 12,
       now.add(Duration(days: -4)): 12,
       now.add(Duration(days: -3)): 34,
-      now.add(Duration(days: -2)): 87,
+      now.add(Duration(days: -2)): 67,
       now.add(Duration(days: -1)): 54,
       now: 64,
     };
@@ -136,10 +136,54 @@ class GraphPainter extends CustomPainter {
       return textPainter;
     }
 
+    void drawDotto() {
+      int dataLenght = data.length - 1;
+      int padding = 50;
+      double dottoSize = 5;
+      double graphWidth = size.width - padding * 2;
+      List<double> dataValues = data.values.toList();
+      double graphHeight = size.height - padding * 2 - 30;
+
+      num topScaleNumber = 0;
+
+      num calcTopScaleNumber() {
+        double maxValue = data.values.toList().reduce(max);
+        int maxValueLenght = maxValue.toInt().toString().length;
+        num underNum = pow(10, maxValueLenght);
+
+        num kami2keta = (maxValue / 100).floor() * 100;
+        num shimo2keta = maxValue % 100;
+
+        String firstValueStr = shimo2keta.toString()[0];
+        num firstValueNum = (int.parse(firstValueStr) + 1) * 10;
+        num returnNum = kami2keta + firstValueNum;
+
+        return returnNum;
+      }
+
+      topScaleNumber = calcTopScaleNumber();
+
+      for (int i = 0; i <= dataLength; i++) {
+        Offset startPoint = Offset(
+            graphWidth / dataLenght * i + padding,
+            size.height -
+                padding -
+                (graphHeight * (dataValues[i] / topScaleNumber)));
+        // size.height -
+        //     padding -
+        //     graphHeight / topScaleNumber * dataValues[i]);
+        print("${i} graphHeight : ${graphHeight}");
+        print("${i} : ${(dataValues[i] / topScaleNumber)}");
+        print("${i} : ${(dataValues[i] / topScaleNumber) * graphHeight}");
+        canvas.drawCircle(startPoint, dottoSize, Paint()..color = Colors.white);
+      }
+    }
+
     drawColumnLine();
     drawColumnLabel();
     drawRowLine();
     drawRowLabel();
+    drawDotto();
   }
 
   @override

@@ -4,19 +4,20 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'dart:math';
 
 class GraphPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final now = DateTime.now();
     Map<DateTime, double> data = {
-      now.add(Duration(days: -6)): 2,
-      now.add(Duration(days: -5)): 2,
-      now.add(Duration(days: -4)): 2,
-      now.add(Duration(days: -3)): 2,
-      now.add(Duration(days: -2)): 2,
-      now.add(Duration(days: -1)): 2,
-      now: 3,
+      now.add(Duration(days: -6)): 22,
+      now.add(Duration(days: -5)): 40,
+      now.add(Duration(days: -4)): 12,
+      now.add(Duration(days: -3)): 34,
+      now.add(Duration(days: -2)): 87,
+      now.add(Duration(days: -1)): 54,
+      now: 64,
     };
 
     print("${data.keys.toList()}");
@@ -70,7 +71,7 @@ class GraphPainter extends CustomPainter {
       double graphHeight = size.height - padding * 2 - 30;
       late Paint paint;
       for (int i = 0; i <= horizontalLine; i++) {
-        print("i : ${i}");
+        // print("i : ${i}");
         Offset startPoint = Offset(
             50 - 10, size.height - padding - graphHeight / horizontalLine * i);
         Offset endPoint = Offset(size.width - 50 + 10,
@@ -85,9 +86,60 @@ class GraphPainter extends CustomPainter {
       return paint;
     }
 
+    TextPainter drawRowLabel() {
+      late TextPainter textPainter;
+      int graphLine = 5;
+      int padding = 50;
+
+      num topScaleNumber = 0;
+
+      num calcTopScaleNumber() {
+        double maxValue = data.values.toList().reduce(max);
+        int maxValueLenght = maxValue.toInt().toString().length;
+        // print("maxValueLenght : ${pow(10, maxValueLenght - 2)}");
+        num underNum = pow(10, maxValueLenght);
+
+        num kami2keta = (maxValue / 100).floor() * 100;
+        num shimo2keta = maxValue % 100;
+        // print("underNum: ${underNum}");
+        // print("kami 2keta : ${kami2keta}");
+        // print("simo 2keta : ${shimo2keta}");
+
+        String firstValueStr = shimo2keta.toString()[0];
+        // print("10 ^ maxValueLenght : ${maxValueLenght}");
+        num firstValueNum = (int.parse(firstValueStr) + 1) * 10;
+        num returnNum = kami2keta + firstValueNum;
+        // print("firstValueStr : ${firstValueStr}");
+        // print("firstValueDou : ${firstValueNum}");
+        // print("returnNum: ${returnNum}");
+
+        return returnNum;
+      }
+
+      topScaleNumber = calcTopScaleNumber();
+
+      double graphHeight = size.height - padding * 2 - 30;
+      for (int i = 0; i <= graphLine; i++) {
+        textPainter = TextPainter(
+          text: TextSpan(
+            text: "${(topScaleNumber / graphLine * i).round()}",
+            style: TextStyle(color: Colors.white, fontSize: 12),
+          ),
+          textDirection: TextDirection.rtl,
+        )
+          ..layout()
+          ..paint(
+              canvas,
+              Offset(padding - 35,
+                  size.height - padding - graphHeight / graphLine * i - 15));
+      }
+      return textPainter;
+    }
+
     drawColumnLine();
     drawColumnLabel();
     drawRowLine();
+    drawRowLabel();
   }
 
   @override

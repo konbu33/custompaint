@@ -26,6 +26,33 @@ class GraphPainter extends CustomPainter {
     int padding = 50;
     double graphWidth = size.width - padding * 2;
 
+    num topScaleNumber = 0;
+
+    num calcTopScaleNumber() {
+      double maxValue = data.values.toList().reduce(max);
+      int maxValueLenght = maxValue.toInt().toString().length;
+      // print("maxValueLenght : ${pow(10, maxValueLenght - 2)}");
+      num underNum = pow(10, maxValueLenght);
+
+      num kami2keta = (maxValue / 100).floor() * 100;
+      num shimo2keta = maxValue % 100;
+      // print("underNum: ${underNum}");
+      // print("kami 2keta : ${kami2keta}");
+      // print("simo 2keta : ${shimo2keta}");
+
+      String firstValueStr = shimo2keta.toString()[0];
+      // print("10 ^ maxValueLenght : ${maxValueLenght}");
+      num firstValueNum = (int.parse(firstValueStr) + 1) * 10;
+      num returnNum = kami2keta + firstValueNum;
+      // print("firstValueStr : ${firstValueStr}");
+      // print("firstValueDou : ${firstValueNum}");
+      // print("returnNum: ${returnNum}");
+
+      return returnNum;
+    }
+
+    topScaleNumber = calcTopScaleNumber();
+
     Paint drawColumnLine() {
       late Paint paint;
 
@@ -91,33 +118,6 @@ class GraphPainter extends CustomPainter {
       int graphLine = 5;
       int padding = 50;
 
-      num topScaleNumber = 0;
-
-      num calcTopScaleNumber() {
-        double maxValue = data.values.toList().reduce(max);
-        int maxValueLenght = maxValue.toInt().toString().length;
-        // print("maxValueLenght : ${pow(10, maxValueLenght - 2)}");
-        num underNum = pow(10, maxValueLenght);
-
-        num kami2keta = (maxValue / 100).floor() * 100;
-        num shimo2keta = maxValue % 100;
-        // print("underNum: ${underNum}");
-        // print("kami 2keta : ${kami2keta}");
-        // print("simo 2keta : ${shimo2keta}");
-
-        String firstValueStr = shimo2keta.toString()[0];
-        // print("10 ^ maxValueLenght : ${maxValueLenght}");
-        num firstValueNum = (int.parse(firstValueStr) + 1) * 10;
-        num returnNum = kami2keta + firstValueNum;
-        // print("firstValueStr : ${firstValueStr}");
-        // print("firstValueDou : ${firstValueNum}");
-        // print("returnNum: ${returnNum}");
-
-        return returnNum;
-      }
-
-      topScaleNumber = calcTopScaleNumber();
-
       double graphHeight = size.height - padding * 2 - 30;
       for (int i = 0; i <= graphLine; i++) {
         textPainter = TextPainter(
@@ -144,25 +144,6 @@ class GraphPainter extends CustomPainter {
       List<double> dataValues = data.values.toList();
       double graphHeight = size.height - padding * 2 - 30;
 
-      num topScaleNumber = 0;
-
-      num calcTopScaleNumber() {
-        double maxValue = data.values.toList().reduce(max);
-        int maxValueLenght = maxValue.toInt().toString().length;
-        num underNum = pow(10, maxValueLenght);
-
-        num kami2keta = (maxValue / 100).floor() * 100;
-        num shimo2keta = maxValue % 100;
-
-        String firstValueStr = shimo2keta.toString()[0];
-        num firstValueNum = (int.parse(firstValueStr) + 1) * 10;
-        num returnNum = kami2keta + firstValueNum;
-
-        return returnNum;
-      }
-
-      topScaleNumber = calcTopScaleNumber();
-
       for (int i = 0; i <= dataLength; i++) {
         Offset startPoint = Offset(
             graphWidth / dataLenght * i + padding,
@@ -172,11 +153,32 @@ class GraphPainter extends CustomPainter {
         // size.height -
         //     padding -
         //     graphHeight / topScaleNumber * dataValues[i]);
-        print("${i} graphHeight : ${graphHeight}");
-        print("${i} : ${(dataValues[i] / topScaleNumber)}");
-        print("${i} : ${(dataValues[i] / topScaleNumber) * graphHeight}");
+        // print("${i} graphHeight : ${graphHeight}");
+        // print("${i} : ${(dataValues[i] / topScaleNumber)}");
+        // print("${i} : ${(dataValues[i] / topScaleNumber) * graphHeight}");
         canvas.drawCircle(startPoint, dottoSize, Paint()..color = Colors.white);
       }
+    }
+
+    void drawPath() {
+      int dataLenght = data.length - 1;
+      double padding = 50;
+      double graphHeight = size.height - padding * 2 - 30;
+      Path fillPath = Path();
+      fillPath.moveTo(padding, size.height - padding);
+
+      for (int i = 0; i <= dataLenght; i++) {
+        fillPath.lineTo(
+            graphWidth / dataLenght * i + padding,
+            size.height -
+                padding -
+                (graphHeight * (data.values.toList()[i] / topScaleNumber)));
+      }
+
+      fillPath.lineTo(size.width - padding, size.height - padding);
+
+      fillPath.close();
+      canvas.drawPath(fillPath, Paint()..color = Colors.white.withOpacity(0.3));
     }
 
     drawColumnLine();
@@ -184,6 +186,7 @@ class GraphPainter extends CustomPainter {
     drawRowLine();
     drawRowLabel();
     drawDotto();
+    drawPath();
   }
 
   @override

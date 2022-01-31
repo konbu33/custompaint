@@ -3,16 +3,17 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'dart:math';
 
 class GraphPainter extends CustomPainter {
+  GraphPainter({required this.counter}) : super();
+  double counter;
   @override
   void paint(Canvas canvas, Size size) {
     final now = DateTime.now();
     Map<DateTime, double> data = {
-      now.add(Duration(days: -6)): 22,
+      now.add(Duration(days: -6)): counter,
       now.add(Duration(days: -4)): 12,
       now.add(Duration(days: -5)): 12,
       now.add(Duration(days: -3)): 34,
@@ -194,6 +195,6 @@ class GraphPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+    return true;
   }
 }

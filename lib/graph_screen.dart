@@ -9,16 +9,23 @@ class GraphScreen extends StatefulWidget {
 }
 
 class _GraphScreenState extends State<GraphScreen> {
+  double counter = 0;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
-      appBar: AppBar(
-        title: Text("graph"),
-      ),
-      body: CustomPaint(
-        size: Size(double.infinity, double.infinity),
-        painter: GraphPainter(),
+    return GestureDetector(
+      onTap: () {
+        counter++;
+        setState(() {});
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).primaryColor,
+        appBar: AppBar(
+          title: Text("graph"),
+        ),
+        body: CustomPaint(
+          size: Size(double.infinity, double.infinity),
+          painter: GraphPainter(counter: counter),
+        ),
       ),
     );
   }

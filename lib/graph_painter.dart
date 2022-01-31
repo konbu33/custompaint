@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -12,13 +13,15 @@ class GraphPainter extends CustomPainter {
     final now = DateTime.now();
     Map<DateTime, double> data = {
       now.add(Duration(days: -6)): 22,
-      now.add(Duration(days: -5)): 12,
       now.add(Duration(days: -4)): 12,
+      now.add(Duration(days: -5)): 12,
       now.add(Duration(days: -3)): 34,
       now.add(Duration(days: -2)): 67,
       now.add(Duration(days: -1)): 54,
       now: 64,
     };
+
+    data = SplayTreeMap.from(data, (a, b) => a.compareTo(b));
 
     print("${data.keys.toList()}");
 

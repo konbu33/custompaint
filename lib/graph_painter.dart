@@ -1,87 +1,77 @@
 import 'dart:collection';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
-
 import 'package:intl/intl.dart' hide TextDirection;
 import 'dart:math';
 
 class GraphPainter extends CustomPainter {
-  GraphPainter({required this.counter}) : super();
-  double counter;
   @override
   void paint(Canvas canvas, Size size) {
-    final now = DateTime.now();
-    Map<DateTime, double> data = {
-      now.add(Duration(days: -6)): counter,
-      now.add(Duration(days: -4)): 12,
-      now.add(Duration(days: -5)): 12,
-      now.add(Duration(days: -3)): 34,
-      now.add(Duration(days: -2)): 67,
-      now.add(Duration(days: -1)): 54,
-      now: 64,
-    };
+    // Map<DateTime, int> initData = {
+    //   DateTime.now().add(Duration(days: -1)): 23,
+    //   DateTime.now().add(Duration(days: -2)): 38,
+    //   DateTime.now().add(Duration(days: -4)): 11,
+    //   DateTime.now().add(Duration(days: -3)): 56,
+    //   DateTime.now().add(Duration(days: -5)): 73,
+    //   DateTime.now().add(Duration(days: -6)): 89,
+    //   DateTime.now().add(Duration(days: -7)): 48,
+    // };
+    Map<DateTime, int> initData = {};
+    for (int i = 0; i < 10; i++) {
+      initData[DateTime.now().add(Duration(days: -1 * Random().nextInt(10)))] =
+          Random().nextInt(100);
+    }
+    // for (int i = 0; i < 7; i++) {
+    //   data[DateTime.now().add(Duration(days: i * -1))] = i * 10 + 106;
+    // }
+    print("init data : ${initData}");
 
-    data = SplayTreeMap.from(data, (a, b) => a.compareTo(b));
+    Map<DateTime, int> data = {};
+    data = SplayTreeMap.from(initData, (a, b) => b.compareTo(a));
+    print("sort data: ${data}");
 
-    print("${data.keys.toList()}");
+    int graphScaleNum = 0;
+    int calcGraphScaleNum() {
+      print("dataValueMax: ${data.values.toList().reduce(max)})}");
+      int dataValueMax = data.values.toList().reduce(max);
+      int kami2keta = dataValueMax ~/ 100 * 100;
+      int shimo2keta = (dataValueMax % 100 * 0.1).ceil() * 10;
+      dataValueMax = kami2keta + shimo2keta;
+      print(
+          "kami2keta : ${kami2keta}, shimo2keta: ${shimo2keta}, dataValueMax: ${dataValueMax})}");
+      return dataValueMax;
+    }
+
+    graphScaleNum = calcGraphScaleNum();
+
+    print("h : ${size.height} , w : ${size.width}");
+    double padding = 50;
+    double graphWidth = size.width - (padding * 2);
+    double graphHeight = size.height - (padding * 2) - 30;
+    print("gh : ${graphHeight} , gw : ${graphWidth}");
 
     int dataLength = data.length - 1;
-    int padding = 50;
-    double graphWidth = size.width - padding * 2;
+    double graphVirticalLineInterval = graphWidth / dataLength;
+    int graphHorizontalLineNum = 5;
+    double graphHorizontalLineInterval = graphHeight / graphHorizontalLineNum;
+    print("gataLength : ${dataLength}");
+    Path path = Path();
+    path.moveTo(padding, size.height - padding);
 
-    num topScaleNumber = 0;
-
-    num calcTopScaleNumber() {
-      double maxValue = data.values.toList().reduce(max);
-      int maxValueLenght = maxValue.toInt().toString().length;
-      // print("maxValueLenght : ${pow(10, maxValueLenght - 2)}");
-      num underNum = pow(10, maxValueLenght);
-
-      num kami2keta = (maxValue / 100).floor() * 100;
-      num shimo2keta = maxValue % 100;
-      // print("underNum: ${underNum}");
-      // print("kami 2keta : ${kami2keta}");
-      // print("simo 2keta : ${shimo2keta}");
-
-      String firstValueStr = shimo2keta.toString()[0];
-      // print("10 ^ maxValueLenght : ${maxValueLenght}");
-      num firstValueNum = (int.parse(firstValueStr) + 1) * 10;
-      num returnNum = kami2keta + firstValueNum;
-      // print("firstValueStr : ${firstValueStr}");
-      // print("firstValueDou : ${firstValueNum}");
-      // print("returnNum: ${returnNum}");
-
-      return returnNum;
-    }
-
-    topScaleNumber = calcTopScaleNumber();
-
-    Paint drawColumnLine() {
-      late Paint paint;
-
+    void drawVirticalLine() {
       for (int i = 0; i <= dataLength; i++) {
-        Offset startPoint = Offset(graphWidth / dataLength * i + padding, 50);
-        Offset endPoint =
-            Offset(graphWidth / dataLength * i + padding, size.height - 50);
+        Offset start = Offset(padding + graphVirticalLineInterval * i, padding);
+        Offset end = Offset(
+            padding + graphWidth / dataLength * i, size.height - padding);
 
-        paint = Paint()
-          ..strokeWidth = 1
-          ..color = Colors.white;
-        canvas.drawLine(startPoint, endPoint, paint);
-      }
-      return paint;
-    }
+        canvas.drawLine(
+            start,
+            end,
+            Paint()
+              ..color = Colors.white
+              ..strokeWidth = 1);
 
-    TextPainter drawColumnLabel() {
-      late TextPainter textPainter;
-
-      for (int i = 0; i <= dataLength; i++) {
-        Offset labelEndPoint = Offset(
-            graphWidth / dataLength * i + padding - 10, size.height - 50 + 10);
-
-        textPainter = TextPainter(
-          textDirection: TextDirection.ltr,
+        TextPainter(
           text: TextSpan(
             text: DateFormat('M/d').format(data.keys.toList()[i]),
             style: TextStyle(
@@ -89,108 +79,68 @@ class GraphPainter extends CustomPainter {
               fontSize: 12,
             ),
           ),
-        )
-          ..layout()
-          ..paint(canvas, labelEndPoint);
-      }
-      return textPainter;
-    }
-
-    Paint drawRowLine() {
-      int horizontalLine = 5;
-      int padding = 50;
-      double graphHeight = size.height - padding * 2 - 30;
-      late Paint paint;
-      for (int i = 0; i <= horizontalLine; i++) {
-        // print("i : ${i}");
-        Offset startPoint = Offset(
-            50 - 10, size.height - padding - graphHeight / horizontalLine * i);
-        Offset endPoint = Offset(size.width - 50 + 10,
-            size.height - padding - graphHeight / horizontalLine * i);
-
-        paint = Paint()
-          ..strokeWidth = 1
-          ..color = Colors.white;
-
-        canvas.drawLine(startPoint, endPoint, paint);
-      }
-      return paint;
-    }
-
-    TextPainter drawRowLabel() {
-      late TextPainter textPainter;
-      int graphLine = 5;
-      int padding = 50;
-
-      double graphHeight = size.height - padding * 2 - 30;
-      for (int i = 0; i <= graphLine; i++) {
-        textPainter = TextPainter(
-          text: TextSpan(
-            text: "${(topScaleNumber / graphLine * i).round()}",
-            style: TextStyle(color: Colors.white, fontSize: 12),
-          ),
-          textDirection: TextDirection.rtl,
+          textDirection: TextDirection.ltr,
         )
           ..layout()
           ..paint(
-              canvas,
-              Offset(padding - 35,
-                  size.height - padding - graphHeight / graphLine * i - 15));
-      }
-      return textPainter;
-    }
+            canvas,
+            Offset(padding + graphWidth / dataLength * i - 10,
+                size.height - padding),
+          );
 
-    void drawDotto() {
-      int dataLenght = data.length - 1;
-      int padding = 50;
-      double dottoSize = 5;
-      double graphWidth = size.width - padding * 2;
-      List<double> dataValues = data.values.toList();
-      double graphHeight = size.height - padding * 2 - 30;
+        double yValue = size.height -
+            padding -
+            graphHeight * (data.values.toList()[i] / graphScaleNum);
+        Offset dotto = Offset(padding + graphVirticalLineInterval * i, yValue);
 
-      for (int i = 0; i <= dataLength; i++) {
-        Offset startPoint = Offset(
-            graphWidth / dataLenght * i + padding,
+        canvas.drawCircle(dotto, 3, Paint()..color = Colors.white);
+
+        path.lineTo(
+            padding + graphVirticalLineInterval * i,
             size.height -
                 padding -
-                (graphHeight * (dataValues[i] / topScaleNumber)));
-        // size.height -
-        //     padding -
-        //     graphHeight / topScaleNumber * dataValues[i]);
-        // print("${i} graphHeight : ${graphHeight}");
-        // print("${i} : ${(dataValues[i] / topScaleNumber)}");
-        // print("${i} : ${(dataValues[i] / topScaleNumber) * graphHeight}");
-        canvas.drawCircle(startPoint, dottoSize, Paint()..color = Colors.white);
+                graphHeight * (data.values.toList()[i] / graphScaleNum));
+      }
+      path.lineTo(size.width - padding, size.height - padding);
+      path.close();
+      canvas.drawPath(path, Paint()..color = Colors.white.withOpacity(0.5));
+    }
+
+    void drawHorizontalLine() {
+      for (int i = 0; i <= graphHorizontalLineNum; i++) {
+        Offset start = Offset(padding - 10,
+            size.height - padding - graphHorizontalLineInterval * i);
+        Offset end = Offset(size.width - padding + 10,
+            size.height - padding - graphHorizontalLineInterval * i);
+        canvas.drawLine(
+          start,
+          end,
+          Paint()
+            ..color = Colors.white
+            ..strokeWidth = 1,
+        );
+
+        TextPainter(
+          text: TextSpan(
+            text: "${(graphScaleNum / graphHorizontalLineNum * i).round()}",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        )
+          ..layout()
+          ..paint(
+            canvas,
+            Offset(padding - 30,
+                size.height - padding - 20 - graphHorizontalLineInterval * i),
+          );
       }
     }
 
-    void drawPath() {
-      int dataLenght = data.length - 1;
-      double padding = 50;
-      double graphHeight = size.height - padding * 2 - 30;
-      Path fillPath = Path();
-      fillPath.moveTo(padding, size.height - padding);
-
-      for (int i = 0; i <= dataLenght; i++) {
-        fillPath.lineTo(
-            graphWidth / dataLenght * i + padding,
-            size.height -
-                padding -
-                (graphHeight * (data.values.toList()[i] / topScaleNumber)));
-      }
-
-      fillPath.lineTo(size.width - padding, size.height - padding);
-
-      fillPath.close();
-      canvas.drawPath(fillPath, Paint()..color = Colors.white.withOpacity(0.3));
-    }
-
-    drawColumnLine();
-    drawColumnLabel();
-    drawRowLine();
-    drawRowLabel();
-    drawDotto();
-    drawPath();
+    drawVirticalLine();
+    drawHorizontalLine();
   }
 
   @override

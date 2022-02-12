@@ -1,5 +1,5 @@
+import 'package:custompaint/graph_painter1.dart';
 import 'package:flutter/material.dart';
-import 'graph_painter.dart';
 
 class GraphScreen extends StatefulWidget {
   const GraphScreen({Key? key}) : super(key: key);
@@ -9,17 +9,22 @@ class GraphScreen extends StatefulWidget {
 }
 
 class _GraphScreenState extends State<GraphScreen> {
+  double counter = 0;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Graph"),
-      ),
-      body: Container(
-        color: Theme.of(context).primaryColor,
-        child: CustomPaint(
+    return GestureDetector(
+      onTap: () {
+        counter++;
+        setState(() {});
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).primaryColor,
+        appBar: AppBar(
+          title: Text("graph"),
+        ),
+        body: CustomPaint(
           size: Size(double.infinity, double.infinity),
-          painter: GraphPainter(),
+          painter: GraphPainter(counter: counter),
         ),
       ),
     );
